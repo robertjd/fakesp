@@ -14,7 +14,7 @@ var DOMAIN = process.env.DOMAIN || 'local.stormpath.com';
 
 
 function startServer(){
-
+  console.log('attempt to start server on port ' + PORT);
   http.createServer(function (req, res) {
     console.log(req.headers.host,req.method,req.headers['content-type'] || '',req.url);
     var params = url.parse(req.url,true).query;
