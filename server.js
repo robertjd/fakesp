@@ -80,11 +80,11 @@ if(API_KEY_FILE){
     getApplication();
   });
 }else{
-  client = new stormpath.Client(
-    new stormpath.ApiKey(
+  client = new stormpath.Client({
+    apiKey: new stormpath.ApiKey(
       STORMPATH_API_KEY_ID,
       STORMPATH_API_KEY_SECRET
     )
-  );
+  });
   getApplication();
 }
