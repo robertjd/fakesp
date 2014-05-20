@@ -11,7 +11,6 @@ var STORMPATH_API_KEY_SECRET = process.env.STORMPATH_API_KEY_SECRET;
 var STORMPATH_APP_HREF = process.env.STORMPATH_APP_HREF;
 var PORT = process.env.PORT || 8001;
 var DOMAIN = process.env.DOMAIN || 'local.stormpath.com';
-var IP = process.env.IP  || '0.0.0.0';
 
 
 function startServer(){
@@ -56,9 +55,9 @@ function startServer(){
       });
       res.end(fs.readFileSync('index.html'));
     }
-  }).listen(PORT, IP);
+  }).listen(PORT);
 
-  console.log('Server running at http://'+IP+':/'+PORT);
+  console.log('Server running on port '+PORT);
 }
 
 function getApplication(){
