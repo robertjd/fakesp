@@ -14,7 +14,7 @@ then run the server:
 
 ```
 API_KEY_FILE=~/Downloads/apiKey.properties \
-APP_HREF=https://api.stormpath.com/v1/applications/STyTpcXSTyKkT3PTWW \
+STORMPATH_APP_HREF=https://api.stormpath.com/v1/applications/STyTpcXSTyKkT3PTWW \
 node server.js
 ```
 
