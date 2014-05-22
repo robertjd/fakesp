@@ -2,15 +2,17 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url');
 var stormpath = require('stormpath');
-
+var open = require('open');
 
 var client, application;
+var IS_PRODUCTION = process.env.NODE_ENV==='production';
 var API_KEY_FILE = process.env.API_KEY_FILE;
 var STORMPATH_API_KEY_ID = process.env.STORMPATH_API_KEY_ID;
 var STORMPATH_API_KEY_SECRET = process.env.STORMPATH_API_KEY_SECRET;
 var STORMPATH_APP_HREF = process.env.STORMPATH_APP_HREF;
 var PORT = process.env.PORT || 8001;
 var DOMAIN = process.env.DOMAIN || 'local.stormpath.com';
+var SSO_SITE_PATH = process.env.SSO_SITE_PATH || '';
 
 
 function startServer(){
@@ -24,7 +26,7 @@ function startServer(){
         'Pragma': 'no-cache',
         'Location': application.createSsoUrl({
           cb_uri: 'http://' + DOMAIN + ':' + PORT,
-          path: ':9000/',
+          path: SSO_SITE_PATH,
           state: 'whaaatuppp'
         })
       });
@@ -55,7 +57,11 @@ function startServer(){
       });
       res.end(fs.readFileSync('index.html'));
     }
-  }).listen(PORT);
+  }).listen(PORT,function(){
+    if(!IS_PRODUCTION){
+      open('http://'+DOMAIN+':'+PORT);
+    }
+  });
 
   console.log('Server running on port '+PORT);
 }
