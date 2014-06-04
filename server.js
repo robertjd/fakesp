@@ -13,6 +13,7 @@ var STORMPATH_APP_HREF = process.env.STORMPATH_APP_HREF;
 var PORT = process.env.PORT || 8001;
 var DOMAIN = process.env.DOMAIN || 'local.stormpath.com';
 var SSO_SITE_PATH = process.env.SSO_SITE_PATH || '';
+var CB_URI = process.env.CB_URI || ('http://' + DOMAIN + ':' + PORT);
 
 
 function startServer(){
@@ -25,7 +26,7 @@ function startServer(){
         'Cache-Control': 'no-store',
         'Pragma': 'no-cache',
         'Location': application.createSsoUrl({
-          cb_uri: 'http://' + DOMAIN + ':' + PORT,
+          cb_uri: CB_URI,
           path: SSO_SITE_PATH,
           state: 'whaaatuppp'
         })
