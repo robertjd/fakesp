@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "node-uuid": "^1.4.1",
-    "stormpath": "git://github.com/robertjd/stormpath-sdk-node.git#sso-url",
+    "stormpath": "^0.4.0",
     "open": "0.0.5"
   }
 }
