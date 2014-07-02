@@ -31,6 +31,17 @@ function startServer(){
         })
       });
       res.end();
+    }else if(req.url==='/logout'){
+      res.writeHead(302, {
+        'Cache-Control': 'no-store',
+        'Pragma': 'no-cache',
+        'Location': application.createIdSiteUrl({
+          callbackUri: CB_URI,
+          path: SSO_SITE_PATH,
+          logout: true
+        })
+      });
+      res.end();
     }else if(params.jwtResponse){
       application.handleIdSiteCallback(req.url,function(err,account){
         if(err){
