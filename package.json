@@ -15,6 +15,7 @@
     "open": "0.0.5",
     "client-sessions": "^0.7.0",
     "express": "^4.9.6",
-    "jwt-simple": "^0.2.0"
+    "jwt-simple": "^0.2.0",
+    "jade": "^1.7.0"
   }
 }
