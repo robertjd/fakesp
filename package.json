@@ -14,6 +14,7 @@
     "stormpath": "^0.4.0",
     "open": "0.0.5",
     "client-sessions": "^0.7.0",
-    "express": "^4.9.6"
+    "express": "^4.9.6",
+    "jwt-simple": "^0.2.0"
   }
 }
