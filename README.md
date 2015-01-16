@@ -10,11 +10,16 @@ Point `local.stormpath.com` to `127.0.0.1` by putting an entry into `/etc/hosts`
 
 `npm i` inside the cloned repo
 
+then export the magic to your environment:
+
+```bash
+export STORMPATH_API_KEY_ID=YO
+export STORMPATH_API_KEY_SECRET=YO
+export STORMPATH_APP_HREF=http://10.1.10.37:8080/v1/applications/YO
+```
 then run the server:
 
 ```
-API_KEY_FILE=~/Downloads/apiKey.properties \
-STORMPATH_APP_HREF=https://api.stormpath.com/v1/applications/STyTpcXSTyKkT3PTWW \
 node server.js
 ```
 
