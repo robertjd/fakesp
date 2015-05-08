@@ -1,27 +1,45 @@
 ### Fake service provider
 
-Use this to imitate a service-provider initiated login flow
+Use this to imitate a service-provider initiated login flow for the
+Stormpath ID Site Feature.  The repo contains a simple HTTP server
+that serves a webapp which will redirect you to ID site for authentication.
+When you return from ID site, a local cookie-based session will be created
+for you.  This is different from the SSO session which ID site retains
+for you.
 
 ### Installation
 
+`git clone` this repo, then `cd` into the folder
+
+`npm install` inside the folder
+
+### Configuration - Your Dev Machine
+
 Point `local.stormpath.com` to `127.0.0.1` by putting an entry into `/etc/hosts`
 
-`git clone` this repo
+Export the configuration for a Stormpath Application, with API keys, to your environment:
 
-`npm i` inside the cloned repo
+    export STORMPATH_API_KEY_ID=XXX
+    export STORMPATH_API_KEY_SECRET=XXX
+    export STORMPATH_APP_HREF=https://api.stormpath.com/v1/applications/XXX
 
-then export the magic to your environment:
+### Configuration - Your Stormpath Tenant
 
-```bash
-export STORMPATH_API_KEY_ID=YO
-export STORMPATH_API_KEY_SECRET=YO
-export STORMPATH_APP_HREF=http://10.1.10.37:8080/v1/applications/YO
-```
-then run the server:
+Login to your Stormpath Tenant and add the following URLs to the list of
+"Authorized Redirect URLs" in your ID Site configuration:
+
+    http://local.stormpath.com:8001/
+    http://local.stormpath.com:8001/logout
+
+
+### Start the Server
+
+You can run the server like so:
 
 ```
 node server.js
 ```
 
-then open up http://local.stormpath.com:8001 in your browser
+It should automatically open http://local.stormpath.com:8001 in your browser,
+and present you with a Login button!  Click it to start the flow.
 
