@@ -15,7 +15,7 @@ for you.
 
 ### Configuration - Your Dev Machine
 
-Point `local.stormpath.com` to `127.0.0.1` by putting an entry into `/etc/hosts`
+Point `stormpath.localhost` to `127.0.0.1` by putting an entry into `/etc/hosts`
 
 Export the configuration for a Stormpath Application, with API keys, to your environment:
 
@@ -28,8 +28,8 @@ Export the configuration for a Stormpath Application, with API keys, to your env
 Login to your Stormpath Tenant and add the following URLs to the list of
 "Authorized Redirect URLs" in your ID Site configuration:
 
-    http://local.stormpath.com:8001/
-    http://local.stormpath.com:8001/logout
+    http://stormpath.localhost:8001/
+    http://stormpath.localhost:8001/logout
 
 
 ### Start the Server
@@ -40,6 +40,6 @@ You can run the server like so:
 node server.js
 ```
 
-It should automatically open http://local.stormpath.com:8001 in your browser,
+It should automatically open http://stormpath.localhost:8001 in your browser,
 and present you with a Login button!  Click it to start the flow.
 
