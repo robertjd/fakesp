@@ -36,7 +36,7 @@ app.get('/', function(req, res){
     application.handleIdSiteCallback(req.url,function(err,idSiteResult){
       if(err){
         res.render('error',{
-          errorText: String(err)
+          errorText: JSON.stringify(err)
         });
       }else{
         req.sp.accountHref = idSiteResult.account.href;
@@ -67,10 +67,25 @@ app.get('/', function(req, res){
 });
 
 app.get('/login', function(req, res){
-  res.redirect(application.createIdSiteUrl({
+
+  var options = {
     callbackUri: CB_URI,
     path: SSO_SITE_PATH
-  }));
+  };
+
+  if(req.query.sof){
+    options.showOrganizationField = Boolean(parseInt(req.query.sof,10));
+  }
+
+  if(req.query.onk){
+    options.organizationNameKey = req.query.onk;
+  }
+
+  if(req.query.state){
+    options.state = req.query.state;
+  }
+
+  res.redirect(application.createIdSiteUrl(options));
   res.end();
 });
 
