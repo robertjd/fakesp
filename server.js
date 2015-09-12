@@ -81,8 +81,16 @@ app.get('/login', function(req, res){
     options.organizationNameKey = req.query.onk;
   }
 
+  if(req.query.usd){
+    options.useSubDomain = true;
+  }
+
   if(req.query.state){
     options.state = req.query.state;
+  }
+
+  if(req.query.path){
+    options.path = req.query.path;
   }
 
   res.redirect(application.createIdSiteUrl(options));

@@ -30,6 +30,15 @@ form.form-horizontal(action="/login",method="get")
             label
               input(type="checkbox" name="usd")
       div.form-group
+        label.control-label.col-xs-4 State
+        div.col-xs-6.col-sm-3.col-md-2
+          input.form-control(type="text" name="state")
+      div.form-group
+        label.control-label.col-xs-4 Path
+        div.col-xs-6.col-sm-3.col-md-2
+          input.form-control(type="text" name="path")
+
+      div.form-group
         label.control-label.col-xs-4
         div.col-xs-6.col-sm-3.col-md-2
           button.btn.btn-primary.form-control(type="submit") Log me in!
