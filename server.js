@@ -1,35 +1,40 @@
-var fs = require('fs');
-var stormpath = require('stormpath');
-var openBrowser = require('open');
+var express = require('express');
 var jwt = require('jwt-simple');
-var client, application;
+var openBrowser = require('open');
+var sessions = require('client-sessions');
+var stormpath = require('stormpath');
+
+
 var IS_PRODUCTION = process.env.NODE_ENV==='production';
-var API_KEY_FILE = process.env.API_KEY_FILE;
-var STORMPATH_API_KEY_ID = process.env.STORMPATH_API_KEY_ID;
-var STORMPATH_API_KEY_SECRET = process.env.STORMPATH_API_KEY_SECRET;
-var STORMPATH_APP_HREF = process.env.STORMPATH_APP_HREF;
 var PORT = process.env.PORT || 8001;
 var DOMAIN = process.env.DOMAIN || 'stormpath.localhost';
-var SSO_SITE_PATH = process.env.SSO_SITE_PATH || '';
-var CB_URI = ( process.env.CB_URI || ('http://' + DOMAIN + ':' + PORT) ) + '/idSiteCallback';
+var ID_SITE_PATH = process.env.ID_SITE_PATH || '';
+var CB_URI = process.env.CB_URI || ('http://' + DOMAIN + ':' + PORT + '/idSiteCallback' );
 
-var express = require('express');
 var app = express();
+var application;
+var client = new stormpath.Client();
+
 app.set('views', './views');
 app.set('view engine', 'jade');
-var sessions = require('client-sessions');
-app.use(sessions({
+
+
+var spCookieInterface = sessions({
   cookieName: 'sp', // cookie name dictates the key name added to the request object
-  secret: STORMPATH_API_KEY_SECRET, // should be a large unguessable string
+  secret: 'will be set after client initialization', // should be a large unguessable string
   duration: 24 * 60 * 60 * 1000, // how long the session will stay valid in ms
   activeDuration: 1000 * 60 * 5 // if expiresIn < activeDuration, the session will be extended by activeDuration milliseconds
-}));
-app.use(sessions({
+});
+
+var lastJwtCookieInterface = sessions({
   cookieName: 'lastJwt', // cookie name dictates the key name added to the request object
-  secret: STORMPATH_API_KEY_SECRET, // should be a large unguessable string
+  secret: 'will be set after client initialization', // should be a large unguessable string
   duration: 24 * 60 * 60 * 1000, // how long the session will stay valid in ms
   activeDuration: 1000 * 60 * 5 // if expiresIn < activeDuration, the session will be extended by activeDuration milliseconds
-}));
+});
+
+app.use(lastJwtCookieInterface);
+app.use(spCookieInterface);
 
 app.get('/', function(req, res){
   if(req.sp && req.sp.accountHref){
@@ -55,7 +60,7 @@ app.get('/', function(req, res){
 });
 
 app.get('/idSiteCallback',function(req,res){
-  var resultJwt = jwt.decode(req.query.jwtResponse,STORMPATH_API_KEY_SECRET);
+  var resultJwt = jwt.decode(req.query.jwtResponse,client.config.apiKey.secret);
   if(req.query.jwtResponse){
     application.handleIdSiteCallback(req.url,function(err,idSiteResult){
       if(err){
@@ -77,7 +82,7 @@ app.get('/login', function(req, res){
 
   var options = {
     callbackUri: CB_URI,
-    path: SSO_SITE_PATH
+    path: ID_SITE_PATH
   };
 
   if(req.query.sof){
@@ -112,10 +117,15 @@ app.get('/logout', function(req, res){
   }));
 });
 
+
+
+
 function startServer(){
-  console.log('attempt to start server on port ' + PORT);
+  lastJwtCookieInterface.secret = client.config.apiKey.secret;
+  spCookieInterface.secret = client.config.apiKey.secret;
+  console.log('Starting server on port ' + PORT);
   app.listen(PORT,function(){
-    console.log('Server running on port '+PORT);
+    console.log('Server running');
     if(!IS_PRODUCTION){
       openBrowser('http://'+DOMAIN+':'+PORT);
     }
@@ -124,7 +134,7 @@ function startServer(){
 }
 
 function getApplication(then){
-  client.getApplication(STORMPATH_APP_HREF,function(err,a){
+  client.getApplication(client.config.application.href,function(err,a){
     if (err){
       throw err;
     }
@@ -133,20 +143,8 @@ function getApplication(then){
   });
 }
 
-if(API_KEY_FILE){
-  stormpath.loadApiKey(API_KEY_FILE, function apiKeyFileLoaded(err, apiKey) {
-    if (err){
-      throw err;
-    }
-    client = new stormpath.Client({apiKey: apiKey});
-    getApplication();
-  });
-}else{
-  client = new stormpath.Client({
-    apiKey: new stormpath.ApiKey(
-      STORMPATH_API_KEY_ID,
-      STORMPATH_API_KEY_SECRET
-    )
-  });
+
+client.on('ready',function(){
   getApplication(startServer);
-}
+});
+

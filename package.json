@@ -10,12 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-uuid": "^1.4.1",
-    "stormpath": "^0.6.0",
-    "open": "0.0.5",
     "client-sessions": "^0.7.0",
     "express": "^4.9.6",
+    "jade": "^1.7.0",
     "jwt-simple": "^0.2.0",
-    "jade": "^1.7.0"
+    "node-uuid": "^1.4.1",
+    "open": "0.0.5",
+    "stormpath": "^0.13.2"
   }
 }
