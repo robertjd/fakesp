@@ -11,7 +11,7 @@ var STORMPATH_APP_HREF = process.env.STORMPATH_APP_HREF;
 var PORT = process.env.PORT || 8001;
 var DOMAIN = process.env.DOMAIN || 'stormpath.localhost';
 var SSO_SITE_PATH = process.env.SSO_SITE_PATH || '';
-var CB_URI = process.env.CB_URI || ('http://' + DOMAIN + ':' + PORT);
+var CB_URI = ( process.env.CB_URI || ('http://' + DOMAIN + ':' + PORT) ) + '/idSiteCallback';
 
 var express = require('express');
 var app = express();
@@ -32,19 +32,7 @@ app.use(sessions({
 }));
 
 app.get('/', function(req, res){
-  if(req.query.jwtResponse){
-    application.handleIdSiteCallback(req.url,function(err,idSiteResult){
-      if(err){
-        res.render('error',{
-          errorText: JSON.stringify(err)
-        });
-      }else{
-        req.sp.accountHref = idSiteResult.account.href;
-        req.lastJwt.value = jwt.decode(req.query.jwtResponse,STORMPATH_API_KEY_SECRET);
-        res.redirect('/');
-      }
-    });
-  }else if(req.sp && req.sp.accountHref){
+  if(req.sp && req.sp.accountHref){
     client.getAccount(req.sp.accountHref,function(err,account){
       if(err){
         res.render('error',{
@@ -62,6 +50,25 @@ app.get('/', function(req, res){
     res.render('index',{
       lastJwt: req.lastJwt.value ? JSON.stringify(req.lastJwt.value,null,2) : null,
       account: null
+    });
+  }
+});
+
+app.get('/idSiteCallback',function(req,res){
+  var resultJwt = jwt.decode(req.query.jwtResponse,STORMPATH_API_KEY_SECRET);
+  if(req.query.jwtResponse){
+    application.handleIdSiteCallback(req.url,function(err,idSiteResult){
+      if(err){
+        res.render('error',{
+          errorText: JSON.stringify(err)
+        });
+      }else{
+        if(idSiteResult.status !== 'LOGOUT'){
+          req.sp.accountHref = idSiteResult.account.href;
+        }
+        req.lastJwt.value = resultJwt;
+        res.redirect('/');
+      }
     });
   }
 });
@@ -98,21 +105,12 @@ app.get('/login', function(req, res){
 });
 
 app.get('/logout', function(req, res){
-  if(req.query.jwtResponse){
-    req.lastJwt.value = jwt.decode(req.query.jwtResponse,STORMPATH_API_KEY_SECRET);
-    res.redirect('/');
-    res.end();
-  }else{
-    req.sp.destroy();
-    res.redirect(application.createIdSiteUrl({
-      callbackUri: CB_URI + '/logout',
-      logout: true
-    }));
-    res.end();
-  }
+  req.sp.destroy();
+  res.redirect(application.createIdSiteUrl({
+    callbackUri: CB_URI,
+    logout: true
+  }));
 });
-
-
 
 function startServer(){
   console.log('attempt to start server on port ' + PORT);
