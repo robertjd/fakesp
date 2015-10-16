@@ -1,5 +1,5 @@
 var express = require('express');
-var jwt = require('jwt-simple');
+var nJwt = require('njwt');
 var openBrowser = require('open');
 var sessions = require('client-sessions');
 var stormpath = require('stormpath');
@@ -60,7 +60,6 @@ app.get('/', function(req, res){
 });
 
 app.get('/idSiteCallback',function(req,res){
-  var resultJwt = jwt.decode(req.query.jwtResponse,client.config.apiKey.secret);
   if(req.query.jwtResponse){
     application.handleIdSiteCallback(req.url,function(err,idSiteResult){
       if(err){
@@ -71,7 +70,7 @@ app.get('/idSiteCallback',function(req,res){
         if(idSiteResult.status !== 'LOGOUT'){
           req.sp.accountHref = idSiteResult.account.href;
         }
-        req.lastJwt.value = resultJwt;
+        req.lastJwt.value = nJwt.verify(req.query.jwtResponse,client.config.apiKey.secret);
         res.redirect('/');
       }
     });
