@@ -70,7 +70,7 @@ app.get('/idSiteCallback',function(req,res){
         if(idSiteResult.status !== 'LOGOUT'){
           req.sp.accountHref = idSiteResult.account.href;
         }
-        req.lastJwt.value = nJwt.verify(req.query.jwtResponse,client.config.apiKey.secret);
+        req.lastJwt.value = nJwt.verify(req.query.jwtResponse,client.config.client.apiKey.secret);
         res.redirect('/');
       }
     });
