@@ -16,6 +16,6 @@
     "njwt": "^0.2.2",
     "node-uuid": "^1.4.1",
     "open": "0.0.5",
-    "stormpath": "^0.14.0"
+    "stormpath": "^0.15.4"
   }
 }
