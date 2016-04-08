@@ -48,6 +48,12 @@ CB_URI=http://stormpath.localhost:8001/idSiteCallback \
 node server.js
 ```
 
-It should automatically open http://stormpath.localhost:8001 in your browser,
-and present you with a Login button!  Click it to start the flow.
+If the server starts sucessfully, you will see this message in your console:
 
+```
+Starting server on port 8001
+Server running, open this URL in your browser:
+http://stormpath.localhost:8001
+```
+
+You can now use the application by navigating to http://stormpath.localhost:8001
