@@ -1,9 +1,9 @@
 var express = require('express');
 var nJwt = require('njwt');
-var openBrowser = require('open');
 var sessions = require('client-sessions');
 var stormpath = require('stormpath');
-
+var request = require('request');
+var url = require('url');
 
 var IS_PRODUCTION = process.env.NODE_ENV==='production';
 var PORT = process.env.PORT || 8001;
@@ -33,8 +33,16 @@ var lastJwtCookieInterface = sessions({
   activeDuration: 1000 * 60 * 5 // if expiresIn < activeDuration, the session will be extended by activeDuration milliseconds
 });
 
+var idSiteBaseUrlCookieInterface = sessions({
+  cookieName: 'idSiteBaseUrl', // cookie name dictates the key name added to the request object
+  secret: 'will be set after client initialization', // should be a large unguessable string
+  duration: 24 * 60 * 60 * 1000, // how long the session will stay valid in ms
+  activeDuration: 1000 * 60 * 5 // if expiresIn < activeDuration, the session will be extended by activeDuration milliseconds
+});
+
 app.use(lastJwtCookieInterface);
 app.use(spCookieInterface);
+app.use(idSiteBaseUrlCookieInterface);
 
 app.get('/', function(req, res){
   if(req.sp && req.sp.accountHref){
@@ -47,15 +55,21 @@ app.get('/', function(req, res){
         res.render('index',{
           lastJwt: req.lastJwt.value ? JSON.stringify(req.lastJwt.value,null,2) : null,
           account: account,
-          accountJson: JSON.stringify(account,null,2)
+          accountJson: JSON.stringify(account,null,2),
+          cb_uri: CB_URI,
+          idSiteBaseUrl: req.idSiteBaseUrl.value
         });
       }
     });
   }else{
+
     res.render('index',{
       lastJwt: req.lastJwt.value ? JSON.stringify(req.lastJwt.value,null,2) : null,
-      account: null
+      account: null,
+      cb_uri: CB_URI,
+      idSiteBaseUrl: req.idSiteBaseUrl.value
     });
+
   }
 });
 
@@ -77,10 +91,11 @@ app.get('/idSiteCallback',function(req,res){
   }
 });
 
+
 app.get('/login', function(req, res){
 
   var options = {
-    callbackUri: CB_URI,
+    callbackUri: req.query.cb_uri || CB_URI,
     path: ID_SITE_PATH
   };
 
@@ -103,9 +118,40 @@ app.get('/login', function(req, res){
   if(req.query.path){
     options.path = req.query.path;
   }
+  var ssoRequestUrl = application.createIdSiteUrl(options);
 
-  res.redirect(application.createIdSiteUrl(options));
-  res.end();
+  if(req.query.idSiteBaseUrl) {
+    var parsedIdSiteBaseUrl = url.parse(req.query.idSiteBaseUrl);
+    var idSiteBaseUrl = parsedIdSiteBaseUrl.protocol + '//' + parsedIdSiteBaseUrl.host;
+    req.idSiteBaseUrl.value = idSiteBaseUrl;
+
+    request({
+      method: 'GET',
+      url: ssoRequestUrl,
+      followRedirect: false
+    }, function (err, response, body) {
+      var idSiteRedirectUrl = response.headers.location || '';
+      if (err) {
+        res.json(err);
+      } else if(response.statusCode !== 302) {
+        res.json(body);
+      } else if(idSiteRedirectUrl.match(/jwtResponse/)) {
+        res.redirect(response.location);
+      } else if(req.query.idSiteBaseUrl) {
+        var parts = idSiteRedirectUrl.split('/#');
+        var newUrl = idSiteBaseUrl + '/#' + parts[1];
+        res.setHeader('Location', newUrl);
+        res.status(302);
+        res.end();
+      } else {
+        res.redirect(idSiteRedirectUrl);
+      }
+    });
+  } else {
+    req.idSiteBaseUrl.value = '';
+    res.redirect(ssoRequestUrl);
+  }
+
 });
 
 app.get('/logout', function(req, res){
@@ -124,10 +170,8 @@ function startServer(){
   spCookieInterface.secret = client.config.apiKey.secret;
   console.log('Starting server on port ' + PORT);
   app.listen(PORT,function(){
-    console.log('Server running');
-    if(!IS_PRODUCTION){
-      openBrowser('http://'+DOMAIN+':'+PORT);
-    }
+    console.log('Server running, open this URL in your browser:');
+    console.log('http://'+DOMAIN+':'+PORT);
   });
 
 }
