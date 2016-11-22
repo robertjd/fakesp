@@ -17,6 +17,6 @@
     "node-uuid": "^1.4.1",
     "open": "0.0.5",
     "request": "^2.70.0",
-    "stormpath": "^0.15.4"
+    "stormpath": "^0.19.0"
   }
 }
