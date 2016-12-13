@@ -13,7 +13,9 @@ var CB_URI = process.env.CB_URI || ('http://' + DOMAIN + ':' + PORT + '/idSiteCa
 
 var app = express();
 var application;
-var client = new stormpath.Client();
+var client = new stormpath.Client({
+  baseUrl: process.env.STORMPATH_APPLICATION_HREF.match(/.+v1/)[0]
+});
 
 app.set('views', './views');
 app.set('view engine', 'jade');
@@ -76,6 +78,7 @@ app.get('/', function(req, res){
 app.get('/idSiteCallback',function(req,res){
   if(req.query.jwtResponse){
     application.handleIdSiteCallback(req.url,function(err,idSiteResult){
+      debugger
       if(err){
         res.render('error',{
           errorText: JSON.stringify(err)
@@ -111,6 +114,20 @@ app.get('/login', function(req, res){
     options.useSubDomain = true;
   }
 
+  if(req.query.require_mfa){
+    options.require_mfa = [];
+    if(req.query.require_mfa.sms){
+      options.require_mfa.push('sms');
+    }
+    if(req.query.require_mfa['google-authenticator']){
+      options.require_mfa.push('google-authenticator');
+    }
+  }
+
+  if(req.query.factor){
+    options.factor = req.query.factor;
+  }
+
   if(req.query.state){
     options.state = req.query.state;
   }
@@ -118,6 +135,7 @@ app.get('/login', function(req, res){
   if(req.query.path){
     options.path = req.query.path;
   }
+
   var ssoRequestUrl = application.createIdSiteUrl(options);
 
   if(req.query.idSiteBaseUrl) {
@@ -182,6 +200,7 @@ function getApplication(then){
       throw err;
     }
     application = a;
+    console.log('Using Application "' + application.name + '" (' + application.href + ')')
     then();
   });
 }

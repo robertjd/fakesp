@@ -37,6 +37,21 @@ form.form-horizontal(action="/login",method="get")
               input(type="checkbox" name="usd")
 
       div.form-group
+        label.control-label.col-xs-4 Requre MFA
+        div.col-xs-6.col-sm-3.col-md-2
+          div.checkbox
+            label SMS
+              input(type="checkbox" name="require_mfa[sms]")
+          div.checkbox
+            label Google Authenticator
+              input(type="checkbox" name="require_mfa[google-authenticator]")
+
+      div.form-group
+        label.control-label.col-xs-4 Challenge Factor
+        div.col-xs-6.col-sm-3.col-md-5
+          input.form-control(type="text" name="factor")
+
+      div.form-group
         label.control-label.col-xs-4 State
         div.col-xs-6.col-sm-3.col-md-2
           input.form-control(type="text" name="state")
